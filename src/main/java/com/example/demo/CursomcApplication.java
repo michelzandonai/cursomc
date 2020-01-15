@@ -1,5 +1,6 @@
 package com.example.demo;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,13 +13,20 @@ import com.example.demo.domain.Cidade;
 import com.example.demo.domain.Cliente;
 import com.example.demo.domain.Endereco;
 import com.example.demo.domain.Estado;
+import com.example.demo.domain.Pagamento;
+import com.example.demo.domain.PagamentoComBoleto;
+import com.example.demo.domain.PagamentoComCartao;
+import com.example.demo.domain.Pedido;
 import com.example.demo.domain.Produto;
+import com.example.demo.domain.enums.EstadoPagamento;
 import com.example.demo.domain.enums.TipoCliente;
 import com.example.demo.repositories.CategoriaRepository;
 import com.example.demo.repositories.CidadeRepository;
 import com.example.demo.repositories.ClienteRepository;
 import com.example.demo.repositories.EnderecoRepository;
 import com.example.demo.repositories.EstadoRepository;
+import com.example.demo.repositories.PagamentoRepository;
+import com.example.demo.repositories.PedidoRepository;
 import com.example.demo.repositories.ProdutoRepository;
 
 @SpringBootApplication
@@ -41,6 +49,12 @@ public class CursomcApplication implements CommandLineRunner {
 
 	@Autowired
 	private ClienteRepository clienteRepository;
+
+	@Autowired
+	private PedidoRepository pedidoRepository;
+	
+	@Autowired
+	private PagamentoRepository pagamentoRepository;
 
 	public static void main(String[] args) {
 		SpringApplication.run(CursomcApplication.class, args);
@@ -82,7 +96,7 @@ public class CursomcApplication implements CommandLineRunner {
 		
 		clie1.getTelefones().addAll(Arrays.asList("273667363","223667303"));
 		
-		Endereco e1 = new Endereco(null, "Rua Flores", "300", "Apto 303", "Jardim", "38220834", clie1, c1); 
+		Endereco e1 = new Endereco(null, "Rua Flores", "300", "Apto 303", "Jardim", "38220834" , clie1, c1); 
 		Endereco e2 = new Endereco(null, "Avenica Mattos", "105", "Sala 800", "Centro", "38220834", clie1, c2);
 
 		
@@ -90,6 +104,23 @@ public class CursomcApplication implements CommandLineRunner {
 		
 		clienteRepository.saveAll(Arrays.asList(clie1)); 
 		enderecoRepository.saveAll(Arrays.asList(e1,e2));
+		
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+//		 
+		Pedido ped1 = new Pedido(null, sdf.parse("10/01/2020 10:32"), clie1, e1);
+		Pedido ped2 = new Pedido(null, sdf.parse("03/01/2020 19:35"), clie1, e2);
+//		
+		Pagamento pagto1 = new PagamentoComCartao(null, EstadoPagamento.QUITADO, ped1, 6);
+		ped1.setPagamento(pagto1);
+		Pagamento pagto2 = new PagamentoComBoleto(null, EstadoPagamento.PENTENTE, ped2, sdf.parse("20/10/2020 00:00"), null);
+		ped2.setPagamento(pagto2);
+//		
+		clie1.getPedidos().addAll(Arrays.asList(ped1,ped2));
+		
+		
+		pedidoRepository.saveAll(Arrays.asList(ped1,ped2));
+		pagamentoRepository.saveAll(Arrays.asList(pagto1,pagto2));
 	}
 
 }
